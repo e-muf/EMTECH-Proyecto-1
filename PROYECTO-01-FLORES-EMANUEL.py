@@ -41,8 +41,14 @@ if not user_validated:
 # en el caso de no tener ventas, se guardará [id_product, quantity_sold(0), count_searches]
 sales_analysis = [None] * len(lifestore_products)
 
+# Se creará una lista que almacene el mes y el en que fue vendido cada producto
+date_sales = []
+
 for product_sale in lifestore_sales:
     product_position = product_sale[1] - 1
+
+    month, year = int(product_sale[3][3:5]), int(product_sale[3][6:])
+    date_sales.append([product_sale[1], month, year])
 
     # Sí no está en la lista, agrego los datos que me interesan, y agrego la cantidad de veces que se vendió
     if sales_analysis[product_position] == None:
@@ -76,11 +82,48 @@ selled_products.sort(key = lambda x: (x[-2] - x[-3]), reverse = True)
 ## SEARCH PRODUCTS ANALYSIS ##
 
 # Ahora se sumará la cantidad de veces que los productos fueron buscados
+# y se agregará a la lista sales_analysis
 for search in lifestore_searches:
     position = search[1] - 1
     sales_analysis[position][-1] += 1
 
-### USER DATA VIEW ###
+## DATE SALES ANALYSIS ##
+# Se ordena la lista por mes y por año
+date_sales.sort(key = lambda x: x[1])
+date_sales.sort(key = lambda x: x[2])
+
+date_total_sales = []
+actual_month = date_sales[0][1]
+actual_year = date_sales[0][2]
+total_amount = 0
+product_count = 0
+
+# Se hará guardará la cantidad de productos e ingresos por mes
+for id_product, month, year in date_sales:
+    if actual_month == month:
+        product_count += 1
+        total_amount += lifestore_products[id_product - 1][2]
+    else:
+        date_total_sales.append([actual_month, actual_year, product_count, total_amount])
+        actual_year = year
+        actual_month = month
+        total_amount = 0
+        product_count = 0
+
+year_total_sales = []
+year_amount = 0
+actual_year = date_sales[0][2]
+for date_sale in date_total_sales:
+    if actual_year == date_sale[1]:
+        year_amount += date_sale[-1]
+    else:
+        year_total_sales.append([actual_year, year_amount])
+        actual_year = date_sale[1]
+        year_amount = 0
+year_total_sales.append([actual_year, year_amount])
+    
+
+####### USER DATA VIEW #######
 while user_validated and is_admin:
     os.system('clear')
     print('**** LifeStore Panel (Administrador) [{}] ****\n'.format(name_input))
@@ -107,7 +150,7 @@ while user_validated and is_admin:
             print('-' * 175)
             for product in selled_products[:middle_position]:
                 id_product = lifestore_products[product[0] - 1]
-                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', product[-3], '\t\t|', product[-1], '\t\t|', id_product[-3])
+                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', product[-3], '\t\t|', id_product[-1], '\t\t|', id_product[-3])
 
         elif sale_filter == '2':
             print('PRODUCTO', ' ' * 110, '| VENDIDO \t| DEVOLUCIONES \t| STOCK \t| PRECIO')
@@ -165,7 +208,24 @@ while user_validated and is_admin:
         input('\nPresiona ENTER para regresar al menú principal.\n')
     
     elif option == '4':
-        print(sales_analysis)
+        months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+        print('\n**** VENTAS MENSUALES ****')
+        print('FECHA \t\t\t| CANTIDAD \t| VENTA TOTAL')
+        print('-' * 55)
+        for date_sale in date_total_sales:
+            print(f'{ months[ date_sale[0] - 1 ] } del { date_sale[1] }', ' ' * (2) , f'\t| { date_sale[2] }\t\t| ${ date_sale[3] }.00')
+
+        print('\n**** VENTAS ANUALES ****')
+        for sales_year in year_total_sales:
+            print(f'En { sales_year[0] } se obtuvo un ingreso de ${ sales_year[1] }.00')
+        
+        print('\n**** VENTAS MENSUALES CON MEJORES INGRESOS ****')
+        print('FECHA \t\t\t| CANTIDAD \t| VENTA TOTAL')
+        print('-' * 55)
+        for date_sale in sorted(date_total_sales, key = lambda x: x[3], reverse=True):
+            print(f'{ months[ date_sale[0] - 1 ] } del { date_sale[1] }', ' ' * (2) , f'\t| { date_sale[2] }\t\t| ${ date_sale[3] }.00')
+
 
         input('\nPresiona ENTER para regresar al menú principal.\n')
 
@@ -173,13 +233,22 @@ while user_validated and is_admin:
         print('¡Hasta luego, {}!'.format(name_input))
         user_validated = False
 
-
     
+while user_validated:
+    os.system('clear')
+    print('**** Bienvenido a LifeStore, {} ****\n'.format(name_input))
+    option = input('''Seleccione el número con la opción deseada:
+1. Mostrar lista de productos
+2. Cerrar Sesión
+>> ''')
 
+    if option == '1':
+        print('PRODUCTO', ' ' * 110, '| CATEGORIA \t\t| PRECIO \t| STOCK')
+        print('-' * 170)
+        for product in lifestore_products:
+            print(product[1], ' ' * (119 - len(product[1])) + '|', product[3], ' ' * (20 - len(product[3])) + ' |', product[2], ' ' * (13 - len(str(product[2]))) + '|', product[4])
 
+        input('\nPresiona ENTER para regresar al menú principal.\n')
 
-
-
-
-    
-
+    elif option == '2':
+        user_validated = False
