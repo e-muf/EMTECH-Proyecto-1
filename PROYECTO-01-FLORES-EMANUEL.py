@@ -76,8 +76,11 @@ for i, product in enumerate(sales_analysis):
 
     # Este cero que se agrega al final será el contador de las busquedas
     sales_analysis[i].append(0)
+
+def take_last_second_thrid(elem):
+    return (elem[-2], elem[-3])
     
-selled_products.sort(key = lambda x: (x[-2] - x[-3]), reverse = True)
+selled_products.sort(key = take_last_second_thrid, reverse = True)
 
 ## SEARCH PRODUCTS ANALYSIS ##
 
@@ -87,10 +90,22 @@ for search in lifestore_searches:
     position = search[1] - 1
     sales_analysis[position][-1] += 1
 
+def take_second(elem):
+    return elem[1]
+
+def take_third(elem):
+    return elem[2]
+
+def take_four(elem):
+    return elem[3]
+
+def take_last(elem):
+    return elem[-1]
+
 ## DATE SALES ANALYSIS ##
 # Se ordena la lista por mes y por año
-date_sales.sort(key = lambda x: x[1])
-date_sales.sort(key = lambda x: x[2])
+date_sales.sort(key = take_second)
+date_sales.sort(key = take_third)
 
 date_total_sales = []
 actual_month = date_sales[0][1]
@@ -146,18 +161,18 @@ while user_validated and is_admin:
         middle_position = len(selled_products) // 2
 
         if sale_filter == '1':
-            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| DEVOLUCIONES \t| STOCK \t| PRECIO')
+            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| CATEGORIA \t\t| PRECIO')
             print('-' * 175)
             for product in selled_products[:middle_position]:
                 id_product = lifestore_products[product[0] - 1]
-                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', product[-3], '\t\t|', id_product[-1], '\t\t|', id_product[-3])
+                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-2], ' ' * (21 - len(id_product[-2])) + '|', id_product[-3])
 
         elif sale_filter == '2':
-            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| DEVOLUCIONES \t| STOCK \t| PRECIO')
+            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| CATEGORIA \t\t| PRECIO')
             print('-' * 175)
             for product in selled_products[middle_position:]:
                 id_product = lifestore_products[product[0] - 1]
-                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', product[-3], '\t\t|', product[-1], '\t\t|', id_product[-3])
+                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-2], ' ' * (21 - len(id_product[-2])) + '|', id_product[-3])
 
         elif sale_filter == '3':
             print('PRODUCTO', ' ' * 110, '| STOCK \t| PRECIO')
@@ -183,7 +198,7 @@ while user_validated and is_admin:
         if search_filter == '1' or search_filter == '2':
             print('PRODUCTO', ' ' * 110, '| # BUSCADOS \t| VENDIDOS')
             print('-' * 146)
-            for product in sorted(sales_analysis, key=lambda x: x[-1], reverse=most_searched):
+            for product in sorted(sales_analysis, key=take_last, reverse=most_searched):
                 id_product = lifestore_products[product[0] - 1]
                 print(id_product[1], ' ' * (119 - len(id_product[1])) + '|', product[-1], '\t\t|', product[-2])
 
@@ -201,7 +216,7 @@ while user_validated and is_admin:
         if score_filter == '1' or score_filter == '2':
             print('PRODUCTO', ' ' * 110, '| SCORE \t| VENDIDOS \t| DEVUELTOS')
             print('-' * 163)
-            for mean_score in sorted(selled_products, key = lambda x: x[1], reverse=best_rated)[:20]:
+            for mean_score in sorted(selled_products, key = take_second, reverse=best_rated)[:20]:
                 id_product = lifestore_products[mean_score[0] - 1]
                 print(id_product[1], ' ' * (119 - len(id_product[1])) + '| {:.2f}'.format(mean_score[1]), '\t\t|', mean_score[-2], '\t\t|', mean_score[-3])
 
@@ -223,7 +238,7 @@ while user_validated and is_admin:
         print('\n**** VENTAS MENSUALES CON MEJORES INGRESOS ****')
         print('FECHA \t\t\t| CANTIDAD \t| VENTA TOTAL')
         print('-' * 55)
-        for date_sale in sorted(date_total_sales, key = lambda x: x[3], reverse=True):
+        for date_sale in sorted(date_total_sales, key = take_four, reverse=True):
             print(f'{ months[ date_sale[0] - 1 ] } del { date_sale[1] }', ' ' * (2) , f'\t| { date_sale[2] }\t\t| ${ date_sale[3] }.00')
 
 
