@@ -1,6 +1,7 @@
 from users import allowed_users
 from lifestore_file import lifestore_products, lifestore_sales, lifestore_searches
 import os
+import numpy as np
 
 ####### LOGIN SECTION #######
 print('\n******* Bienvenido a LIFESTORE *******\n')
@@ -102,6 +103,9 @@ def take_four(elem):
 def take_last(elem):
     return elem[-1]
 
+def take_second_last(elem):
+    return elem[-2]
+
 ## DATE SALES ANALYSIS ##
 # Se ordena la lista por mes y por año
 date_sales.sort(key = take_second)
@@ -136,8 +140,31 @@ for date_sale in date_total_sales:
         actual_year = date_sale[1]
         year_amount = 0
 year_total_sales.append([actual_year, year_amount])
-    
 
+## CATEGORY ANALYSIS ##
+# Se creara una lista que almacenará los siguientes datos
+# [category_product, total_sale_by_category, quantity_product_by_category, total_sales_quantity_relation]
+
+category_analysis = []
+categories = []
+
+for product in sorted(sales_analysis, key = take_second_last, reverse=True):
+    id_product = product[0] - 1
+    if lifestore_products[id_product][3] not in categories:
+        categories.append(lifestore_products[id_product][3])
+        category_analysis.append([lifestore_products[id_product][3], lifestore_products[id_product][2] * product[-2], 1])
+    else:
+        category_position = categories.index(lifestore_products[id_product][3])
+        category_analysis[category_position][1] += lifestore_products[id_product][2] * product[-2]
+        category_analysis[category_position][2] += 1
+
+for category_sale in category_analysis:
+    category_sale.append( category_sale[1] / (category_sale[2] * 100) )
+
+category_analysis.sort(key=take_four, reverse=True)
+
+
+    
 ####### USER DATA VIEW #######
 while user_validated and is_admin:
     os.system('clear')
@@ -147,7 +174,8 @@ while user_validated and is_admin:
 2. Mostrar productos por cantidad de búsquedas
 3. Mostrar productos por reseñas
 4. Mostrar ingresos por fecha
-5. Cerrar Sesión
+5. Mostrar resumen por categorias
+6. Cerrar Sesión
 >> ''')
 
     if option == '1':
@@ -161,18 +189,18 @@ while user_validated and is_admin:
         middle_position = len(selled_products) // 2
 
         if sale_filter == '1':
-            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| CATEGORIA \t\t| PRECIO')
-            print('-' * 175)
+            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| STOCK \t| PRECIO')
+            print('-' * 160)
             for product in selled_products[:middle_position]:
                 id_product = lifestore_products[product[0] - 1]
-                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-2], ' ' * (21 - len(id_product[-2])) + '|', id_product[-3])
+                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-1], '\t\t|', id_product[-3])
 
         elif sale_filter == '2':
-            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| CATEGORIA \t\t| PRECIO')
-            print('-' * 175)
+            print('PRODUCTO', ' ' * 110, '| VENDIDO \t| STOCK \t| PRECIO')
+            print('-' * 160)
             for product in selled_products[middle_position:]:
                 id_product = lifestore_products[product[0] - 1]
-                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-2], ' ' * (21 - len(id_product[-2])) + '|', id_product[-3])
+                print(id_product[1], ' ' * (119 - len(id_product[1])) + '|' ,product[-2], '\t\t|', id_product[-1], '\t\t|', id_product[-3])
 
         elif sale_filter == '3':
             print('PRODUCTO', ' ' * 110, '| STOCK \t| PRECIO')
@@ -201,6 +229,8 @@ while user_validated and is_admin:
             for product in sorted(sales_analysis, key=take_last, reverse=most_searched):
                 id_product = lifestore_products[product[0] - 1]
                 print(id_product[1], ' ' * (119 - len(id_product[1])) + '|', product[-1], '\t\t|', product[-2])
+        else:
+            continue
 
         input('\nPresiona ENTER para regresar al menú principal.\n')
 
@@ -219,6 +249,8 @@ while user_validated and is_admin:
             for mean_score in sorted(selled_products, key = take_second, reverse=best_rated)[:20]:
                 id_product = lifestore_products[mean_score[0] - 1]
                 print(id_product[1], ' ' * (119 - len(id_product[1])) + '| {:.2f}'.format(mean_score[1]), '\t\t|', mean_score[-2], '\t\t|', mean_score[-3])
+        else:
+            continue
 
         input('\nPresiona ENTER para regresar al menú principal.\n')
     
@@ -243,11 +275,18 @@ while user_validated and is_admin:
 
 
         input('\nPresiona ENTER para regresar al menú principal.\n')
-
+    
     elif option == '5':
+        print('CATEGORIA \t     | VENTA TOTAL \t| # PRODUCTOS \t| RELACION')
+        print('-' * 66)
+        for category in category_analysis:
+            print(category[0], ' ' * (20 - len(category[0])) + '|' ,category[1], '\t\t|',category[2], '\t\t| {:.2f}'.format(category[3]))
+
+        input('\nPresiona ENTER para regresar al menú principal.\n')
+
+    elif option == '6':
         print('¡Hasta luego, {}!'.format(name_input))
         user_validated = False
-
     
 while user_validated:
     os.system('clear')
@@ -267,3 +306,11 @@ while user_validated:
 
     elif option == '2':
         user_validated = False
+
+
+# datos = np.asarray(l)
+            
+#             np.savetxt("most_selled.csv",   # Archivo de salida
+#                      datos,
+#                      fmt="%s",
+#                      delimiter=",") 
