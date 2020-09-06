@@ -267,12 +267,12 @@ while user_validated and is_admin:
         for sales_year in year_total_sales:
             print(f'En { sales_year[0] } se obtuvo un ingreso de ${ sales_year[1] }.00')
         
+        
         print('\n**** VENTAS MENSUALES CON MEJORES INGRESOS ****')
         print('FECHA \t\t\t| CANTIDAD \t| VENTA TOTAL')
         print('-' * 55)
         for date_sale in sorted(date_total_sales, key = take_four, reverse=True):
             print(f'{ months[ date_sale[0] - 1 ] } del { date_sale[1] }', ' ' * (2) , f'\t| { date_sale[2] }\t\t| ${ date_sale[3] }.00')
-
 
         input('\nPresiona ENTER para regresar al menú principal.\n')
     
